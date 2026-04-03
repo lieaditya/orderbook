@@ -1,6 +1,9 @@
 #include <iostream>
 #include <queue>
-#include <vector>
+#include <map>
+
+using Price = double;
+using OrderId = int;
 
 enum class OrderType {
     BID,
@@ -15,23 +18,23 @@ struct Order {
 
 class OrderBook {
 private:
-    std::priority_queue<std::pair<double, int>> bidPrices;
-    std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::greater<std::pair<double, int>>> askPrices;
+    std::map<Price, std::queue<OrderId>> askPrices;
+    std::map<Price, std::queue<OrderId>, std::greater<Price>> bidPrices;
 
 public:
     void submit(Order order) {
         if (order.orderType == OrderType::BID) {
-            bidPrices.push({order.price, order.id});
+            bidPrices[order.price].push(order.id);
         } else if (order.orderType == OrderType::ASK) {
-            askPrices.push({order.price, order.id});
+            askPrices[order.price].push(order.id);
         }
     }
 
     double getBestBid() const {
-        return !bidPrices.empty() ? bidPrices.top().first : -1;
+        return !bidPrices.empty() ? bidPrices.begin()->first : -1;
     }
     double getBestAsk() const {
-        return !askPrices.empty() ? askPrices.top().first : -1;
+        return !askPrices.empty() ? askPrices.begin()->first : -1;
     }
 };
 
